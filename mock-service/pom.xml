@@ -3,6 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <relativePath>..</relativePath>
         <artifactId>test</artifactId>
         <groupId>fexco</groupId>
         <version>0.1.0</version>
@@ -11,5 +12,22 @@
 
     <artifactId>mock-service</artifactId>
 
+    <properties>
+        <!-- Main verticle -->
+        <main.verticle>com.fexco.test.mockService.ServiceConfigVerticle</main.verticle>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <!-- plugin to create a `fat-jar` -->
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <!-- copy the cluster configuration -->
+                <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

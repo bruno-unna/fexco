@@ -8,17 +8,18 @@
     <artifactId>test</artifactId>
     <packaging>pom</packaging>
     <version>0.1.0</version>
-    <modules>
-        <module>mock-service</module>
-    </modules>
 
     <properties>
-        <stack.version>3.3.2</stack.version>
+        <stack.version>3.3.3</stack.version>
         <doc.skip>true</doc.skip>
 
         <!--overridden in each project packaged as a fat jar -->
         <main.verticle/>
     </properties>
+
+    <modules>
+        <module>mock-service</module>
+    </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -37,7 +38,7 @@
         <!-- Core toolkit -->
 
         <dependency>
-            <groupId>vertx.io</groupId>
+            <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
         </dependency>
 
