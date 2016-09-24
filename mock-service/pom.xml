@@ -22,7 +22,7 @@
 
     <properties>
         <!-- Main verticle -->
-        <main.verticle>com.fexco.test.mockService.ServiceConfigVerticle</main.verticle>
+        <main.verticle>com.fexco.test.mockService.MockService</main.verticle>
     </properties>
 
     <build>

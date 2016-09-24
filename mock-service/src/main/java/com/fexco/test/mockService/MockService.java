@@ -10,7 +10,7 @@ import io.vertx.core.json.JsonObject;
 /**
  * a verticle generating mock responses for eircode queries
  */
-public class ServiceConfigVerticle extends MicroServiceVerticle {
+public class MockService extends MicroServiceVerticle {
 
     /**
      * The address on which the data are sent.
