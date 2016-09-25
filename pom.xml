@@ -6,8 +6,9 @@
 
     <groupId>fexco</groupId>
     <artifactId>test</artifactId>
-    <packaging>pom</packaging>
     <version>0.1.0</version>
+
+    <packaging>pom</packaging>
 
     <properties>
         <stack.version>3.3.3</stack.version>
@@ -111,6 +112,36 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.spotify</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.4.13</version>
+                    <executions>
+                        <execution>
+                            <id>docker</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
+                        <!-- this needs to be overridden by modules -->
+                        <imageName></imageName>
+                        <resources>
+                            <resource>
+                                <targetPath>/verticles</targetPath>
+                                <directory>${project.build.directory}</directory>
+                                <includes>
+                                    <include>${project.artifactId}-${project.version}.jar</include>
+                                </includes>
+                            </resource>
+                            <!-- don't forget to also add all additional dependencies -->
+                        </resources>
+                    </configuration>
                 </plugin>
 
             </plugins>
