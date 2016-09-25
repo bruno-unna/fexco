@@ -1,5 +1,7 @@
 package com.fexco.test.mockService;
 
+import com.fexco.test.mockService.model.EircodeAddress;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,9 +9,13 @@ import org.junit.runner.RunWith;
 
 import java.net.ServerSocket;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -21,6 +27,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 public class MockServiceTest {
     private Vertx vertx;
     private int port;
+    private Logger logger = LoggerFactory.getLogger(MockServiceTest.class);
 
     @Before
     public void setUp(TestContext context) throws Exception {
@@ -44,13 +51,15 @@ public class MockServiceTest {
     public void testSimpleRequestResponse(TestContext context) throws Exception {
         final Async async = context.async();
 
-
-        vertx.createHttpClient().getNow(port, "localhost", "/", response -> {
-            response.handler(body -> {
-                context.assertTrue(body.toString().contains("Hello"));
-                async.complete();
-            });
-        });
+        vertx.createHttpClient()
+                .getNow(port, "localhost", "/pcw/PCW45-12345-12345-1234X/address/ie/D02X285?lines=3&format=json", response -> {
+                    context.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
+                    response.bodyHandler(body -> {
+                        final EircodeAddress[] addresses = Json.decodeValue(body.toString(), EircodeAddress[].class);
+                        context.assertEquals(10, addresses.length);
+                        async.complete();
+                    });
+                });
     }
 
 }
