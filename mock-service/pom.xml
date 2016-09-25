@@ -12,14 +12,6 @@
 
     <artifactId>mock-service</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>fexco</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
-
     <properties>
         <!-- Main verticle -->
         <main.verticle>com.fexco.test.mockService.MockService</main.verticle>
