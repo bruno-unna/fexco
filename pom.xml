@@ -18,7 +18,6 @@
     </properties>
 
     <modules>
-        <module>common</module>
         <module>mock-service</module>
     </modules>
 
