@@ -20,6 +20,7 @@
 
     <modules>
         <module>mock-service</module>
+        <module>proxy-service</module>
     </modules>
 
     <dependencyManagement>
