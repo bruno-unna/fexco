@@ -1,6 +1,5 @@
 package com.fexco.test.mockService;
 
-import com.fexco.test.common.MicroServiceVerticle;
 import com.fexco.test.mockService.model.EircodeAddress;
 
 import java.util.List;
@@ -11,11 +10,9 @@ import java.util.stream.Stream;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
