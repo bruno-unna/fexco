@@ -1,4 +1,4 @@
 {
-  "http.port": 8082,
-  "redis.host": "localhost"
+  "http.port": 8080,
+  "redis.host": "redis"
 }
