@@ -28,36 +28,28 @@ public class ProxyService extends AbstractVerticle {
     public void start(Future<Void> future) throws Exception {
         final Integer port = config().getInteger("http.port", 8080);
 
-        Router router = Router.router(vertx);
-        router.get("/pcw/:apiKey/address/ie/:fragment").handler(this::handleRequest);
-
         String redisHost = config().getString("redis.host", "redis");
         Integer redisPort = config().getInteger("redis.port", 6379);
         RedisOptions redisOptions = new RedisOptions()
                 .setHost(redisHost)
                 .setPort(redisPort);
         redis = RedisClient.create(vertx, redisOptions);
-        redis.info(jsonObjectAsyncResult -> {
-            if (jsonObjectAsyncResult.failed()) {
-                logger.fatal("Can't connect to redis server", jsonObjectAsyncResult.cause());
-                future.fail(jsonObjectAsyncResult.cause());
-            } else {
-                logger.info(jsonObjectAsyncResult.result().toString());
-                vertx
-                        .createHttpServer()
-                        .requestHandler(router::accept)
-                        .listen(port, result -> {
-                            if (result.succeeded()) {
-                                logger.info("Proxy server started on port " + port);
-                                future.complete();
-                            } else {
-                                logger.error("Couldn't start proxy server on port " + port);
-                                future.fail(result.cause());
-                            }
-                        });
-            }
-        });
 
+        Router router = Router.router(vertx);
+        router.get("/pcw/:apiKey/address/ie/:fragment").handler(this::handleRequest);
+
+        vertx
+                .createHttpServer()
+                .requestHandler(router::accept)
+                .listen(port, result -> {
+                    if (result.succeeded()) {
+                        logger.info("Proxy server started on port " + port);
+                        future.complete();
+                    } else {
+                        logger.error("Couldn't start proxy server on port " + port);
+                        future.fail(result.cause());
+                    }
+                });
     }
 
     private void handleRequest(RoutingContext routingContext) {
@@ -65,6 +57,14 @@ public class ProxyService extends AbstractVerticle {
         String fragment = routingContext.request().getParam("fragment");
         String format = routingContext.request().getParam("format");
         logger.info("in getAddress, apiKey=" + apiKey + ", fragment=" + fragment);
+
+        redis.info(jsonObjectAsyncResult -> {
+            if (jsonObjectAsyncResult.succeeded()) {
+                logger.info(jsonObjectAsyncResult.result().toString());
+            } else {
+                logger.fatal("Error querying redis", jsonObjectAsyncResult.cause());
+            }
+        });
 
         routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON);
 
