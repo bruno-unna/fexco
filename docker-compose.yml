@@ -1,0 +1,10 @@
+version: '2'
+services:
+  proxy-service:
+    image: unna/proxy-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+  redis:
+    image: redis

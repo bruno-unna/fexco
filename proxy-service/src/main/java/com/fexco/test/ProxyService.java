@@ -31,7 +31,7 @@ public class ProxyService extends AbstractVerticle {
         Router router = Router.router(vertx);
         router.get("/pcw/:apiKey/address/ie/:fragment").handler(this::handleRequest);
 
-        String redisHost = config().getString("redis.host", "localhost");
+        String redisHost = config().getString("redis.host", "redis");
         Integer redisPort = config().getInteger("redis.port", 6379);
         RedisOptions redisOptions = new RedisOptions()
                 .setHost(redisHost)
