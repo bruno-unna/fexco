@@ -107,6 +107,14 @@ public class ProxyService extends AbstractVerticle {
         }
     }
 
+    /**
+     * Looks for the required fragment in redis and returns it if found; otherwise
+     * queries the proxy-ed service, stores the result in redis and returns it.
+     *
+     * @param apiKey authentication token from the client
+     * @param fragment string for which the search is performed
+     * @return result of the search, either fresh or cached
+     */
     private String getAddressesString(String apiKey, String fragment) {
         return null;
     }
