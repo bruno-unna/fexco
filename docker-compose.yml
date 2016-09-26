@@ -5,6 +5,10 @@ services:
     image: unna/proxy-service
     ports:
       - "8080:8080"
+    environment:
+      - API_PORT: 8080
+      - REDIS_HOST: redis.fexco_default
+      - REDIS_PORT: 6379
     depends_on:
       - redis
   redis:
