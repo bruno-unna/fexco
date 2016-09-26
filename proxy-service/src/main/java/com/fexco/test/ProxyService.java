@@ -31,25 +31,33 @@ public class ProxyService extends AbstractVerticle {
         Router router = Router.router(vertx);
         router.get("/pcw/:apiKey/address/ie/:fragment").handler(this::handleRequest);
 
-        // TODO get this configuration from another place
+        String redisHost = config().getString("redis.host", "localhost");
+        Integer redisPort = config().getInteger("redis.port", 6379);
         RedisOptions redisOptions = new RedisOptions()
-                .setHost("127.0.0.1");
+                .setHost(redisHost)
+                .setPort(redisPort);
         redis = RedisClient.create(vertx, redisOptions);
-        // TODO make this info extraction more reliable
-        redis.info(jsonObjectAsyncResult -> logger.info(jsonObjectAsyncResult.result().toString()));
+        redis.info(jsonObjectAsyncResult -> {
+            if (jsonObjectAsyncResult.failed()) {
+                logger.fatal("Can't connect to redis server", jsonObjectAsyncResult.cause());
+                future.fail(jsonObjectAsyncResult.cause());
+            } else {
+                logger.info(jsonObjectAsyncResult.result().toString());
+                vertx
+                        .createHttpServer()
+                        .requestHandler(router::accept)
+                        .listen(port, result -> {
+                            if (result.succeeded()) {
+                                logger.info("Proxy server started on port " + port);
+                                future.complete();
+                            } else {
+                                logger.error("Couldn't start proxy server on port " + port);
+                                future.fail(result.cause());
+                            }
+                        });
+            }
+        });
 
-        vertx
-                .createHttpServer()
-                .requestHandler(router::accept)
-                .listen(port, result -> {
-                    if (result.succeeded()) {
-                        logger.info("Mock server started on port " + port);
-                        future.complete();
-                    } else {
-                        logger.error("Couldn't start mock server on port " + port);
-                        future.fail(result.cause());
-                    }
-                });
     }
 
     private void handleRequest(RoutingContext routingContext) {
