@@ -28,7 +28,7 @@ public class ProxyService extends AbstractVerticle {
     public void start(Future<Void> future) throws Exception {
         final Integer port = config().getInteger("http.port", 8080);
 
-        String redisHost = config().getString("redis.host", "redis");
+        String redisHost = config().getString("redis.host", "redis.fexco_default");
         Integer redisPort = config().getInteger("redis.port", 6379);
         RedisOptions redisOptions = new RedisOptions()
                 .setHost(redisHost)
