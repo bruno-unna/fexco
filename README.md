@@ -1,28 +1,121 @@
 # *Eircode* and *postcode* proxy service
 
+TL;DR
+- Instructions for building and running the exercise are provided 
+[at the end](#how_to_run).
+- This project builds two docker images:
+  - One for development purposes, that generates random responses 
+    (module `mock-service`).
+  - Another (the important one) that is the required development 
+    (module `proxy-service`).
+- A Redis server is required.
+- A docker-compose file for the wrapped-up final product is included, that 
+  takes care of all servers and configuration.
+
 ## Background
 
-Eircode is Ireland's first public database of unique identifiers for all addresses. Introduced by the Irish government in July 2015, it is intended to allow citizens, businesses and public bodies to locate every individual address in the country. The registries of that information are the Eircode Address Database (ECAD) and the Eircode Address File (ECAF).
+Eircode is Ireland's first public database of unique identifiers for all 
+addresses. Introduced by the Irish government in July 2015, it is intended 
+to allow citizens, businesses and public bodies to locate every individual 
+address in the country. The registries of that information are the Eircode 
+Address Database (ECAD) and the Eircode Address File (ECAF).
 
 UK has its own postcode, maintained by the Royal Mail.
 
 ## Problem
 
-Information to both data bases can be retrieved from third party services, as [Allies Computing](https://www.alliescomputing.com/), but the service can be expensive.
+Information to both data bases can be retrieved from third party services, 
+as [Allies Computing](https://www.alliescomputing.com/), but the service 
+can be expensive.
 
-## Requirements
+### Requirements
 
-### Core requirements
+#### Core requirements
 
-Because of the cost of the external service, and in order to minimise network traffic as regards information that changes so slowly, a proxy service has been devised, capable of caching the queries and results. A service that:
+Because of the cost of the external service, and in order to minimise 
+network traffic as regards information that changes so slowly, a proxy 
+service has been devised, capable of caching the queries and results. A 
+service that:
 
 - Exposes an API that is compatible with and uses the third-party API.
 - Avoids repeated requests to hit the third party API.
 
-### Secondary requirements
+#### Secondary requirements
 
-This service can be called by multiple services, that can add up to one million requests per month. Thus, the service:
+This service can be called by multiple services, that can add up to one 
+million requests per month. Thus, the service:
 
 - Makes sure the previous requests survive on service restarts.
 - Is easy (or automatic) to scale horizontally, to cope with the load.
+- Must take the form of Docker images.
+
+## Solution
+
+The solution is correctly outlined in the requirements, but these are 
+overlooking some aspects of modern distributed systems, aspects that are 
+worth bringing forward in this solution.
+
+A modern solution, in order to compete and be useful under the ever more 
+stressing demands of current distributed systems, should be responsive, 
+resilient and elastic. More often than not, these desired features are 
+achievable by means of event-based architectures.
+
+### Reactivity
+
+The aforementioned features of a modern architecture have been described 
+in the [Reactive Manifesto](http://www.reactivemanifesto.org/). Several 
+approaches have emerged to its fulfillment, with two outstanding schools: 
+reactive extensions (Rx) and reactive streams (RS). Each of them have 
+implementations in the form of libraries, toolboxes or frameworks. Some 
+implementations offer the two approaches at the same time.
+
+A key concept of the reactive way is called *back pressure propagation*. 
+It refers to the up-stream signaling (from consumers to producers) for 
+the control of information traffic. This way, the traditional problems 
+of consumer starvation and -more importantly- of buffer overflows are 
+efficiently solved. A common trait of reactive technologies is the 
+inclusion of automatic back pressure propagation in distributed systems.
+
+### Architecture
+
+The overall architecture of this solution is based on micro-services, 
+but in addition to that, reactivity has been considered in the design. 
+As per the requirements, a Docker image is created, running a Vert.x 
+service (only a http RESTful interface, and only a GET method).
+
+In order to achieve persistence for the cache, a Redis server is used. 
+This provides the cache server with an high-efficiency replicated 
+in-memory cache, providing at the same time the benefits of replication 
+(for high-availability) and durability (via redis configuration).
+
+```
++----------+             +--------+
+| external |             | proxy  |             +-------+
+| server   | <-- http -- | server | <-- tcp --> | REDIS | ...
+|          |             |        | ...         +-------+
++----------+             +--------+
+                              ^
+                              |
+                              |
+                         +----------+
+                         | internal |
+                         | consumer | ...
+                         +----------+
+```
+
+This diagram shows the components of the solution. It can be seen 
+ellipsis next to several boxes:
+
+- The internal consumers can be numerous, by the definition of the problem.
+- Redis servers can be deployed in high-availability mode (clustered).
+- The proxy server, which is the main matter of this exercise, can be 
+  deployed after a load balancer if the load becomes really havy.
+
+### Technology stack
+
+### Discussion
+
+#### Code structure
+
+#### <a name="how_to_run"></a>How to run
 
