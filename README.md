@@ -8,7 +8,9 @@ TL;DR
     (module `mock-service`).
   - Another (the important one) that is the required development 
     (module `proxy-service`).
-- A docker-compose file for the wrapped-up final product is included. 
+- A Redis server is required.
+- A docker-compose file for the wrapped-up final product is included, that 
+  takes care of all servers and configuration.
 
 ## Background
 
