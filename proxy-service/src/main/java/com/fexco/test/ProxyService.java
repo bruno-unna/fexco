@@ -128,6 +128,11 @@ public class ProxyService extends AbstractVerticle {
      *                 either fresh or cached
      */
     protected String getAddressesString(String apiKey, AddressCatalog catalog, String fragment) {
+        redis.get(catalog.getPrefix() + ":" + fragment, stringAsyncResult -> {
+            if (stringAsyncResult.failed()) {
+
+            }
+        });
         return null;
     }
 
