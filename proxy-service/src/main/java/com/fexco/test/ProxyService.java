@@ -26,6 +26,9 @@ public class ProxyService extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> future) throws Exception {
+
+        // fist we need operational parameters, either from
+        // environment or from vertx configuration file
         String redisHost = System.getenv("REDIS_HOST");
         if (redisHost == null) {
             redisHost = config().getString("redis.host", "redis");
@@ -44,6 +47,7 @@ public class ProxyService extends AbstractVerticle {
         }
         logger.info("Using http port " + httpPort);
 
+        // a connection with a redis server is needed by this service
         RedisOptions redisOptions = new RedisOptions()
                 .setHost(redisHost)
                 .setPort(redisPort);
@@ -59,9 +63,12 @@ public class ProxyService extends AbstractVerticle {
             }
         });
 
+        // create the routes that are recognised by the service
+        // and send requests to appropriate handlers
         Router router = Router.router(vertx);
-        router.get("/pcw/:apiKey/address/ie/:fragment").handler(this::handleRequest);
+        router.get("/pcw/:apiKey/address/ie/:fragment").handler(this::handleIERequest);
 
+        // finally, create the http server, using the created router
         vertx
                 .createHttpServer()
                 .requestHandler(router::accept)
@@ -83,7 +90,7 @@ public class ProxyService extends AbstractVerticle {
      *
      * @param routingContext routing context as provided by vertx-web
      */
-    private void handleRequest(RoutingContext routingContext) {
+    private void handleIERequest(RoutingContext routingContext) {
         String apiKey = routingContext.request().getParam("apiKey");
         String fragment = routingContext.request().getParam("fragment");
         String format = routingContext.request().getParam("format");
@@ -103,7 +110,7 @@ public class ProxyService extends AbstractVerticle {
             routingContext
                     .response()
                     .setStatusCode(HttpResponseStatus.OK.code())
-                    .end(Json.encodePrettily(getAddressesString(apiKey, fragment)));
+                    .end(Json.encodePrettily(getAddressesString(apiKey, AddressCatalog.eirCode, fragment)));
         }
     }
 
@@ -111,11 +118,12 @@ public class ProxyService extends AbstractVerticle {
      * Looks for the required fragment in redis and returns it if found; otherwise
      * queries the proxy-ed service, stores the result in redis and returns it.
      *
-     * @param apiKey authentication token from the client
-     * @param fragment string for which the search is performed
-     * @return result of the search, either fresh or cached
+     * @param apiKey   authentication token from the client
+     * @param catalog  catalog upon which the query is to be performed
+     * @param fragment string for which the search is performed  @return result of the search,
+     *                 either fresh or cached
      */
-    private String getAddressesString(String apiKey, String fragment) {
+    private String getAddressesString(String apiKey, AddressCatalog catalog, String fragment) {
         return null;
     }
 
