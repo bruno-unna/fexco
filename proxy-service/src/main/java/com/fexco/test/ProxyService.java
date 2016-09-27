@@ -64,9 +64,12 @@ public class ProxyService extends AbstractVerticle {
         });
 
         // create the routes that are recognised by the service
-        // and send requests to appropriate handlers
+        // and send requests to appropriate handler/catalog
         Router router = Router.router(vertx);
-        router.get("/pcw/:apiKey/address/ie/:fragment").handler(this::handleIERequest);
+        router.get("/pcw/:apiKey/address/ie/:fragment").handler((routingContext) ->
+                handleRequest(routingContext, AddressCatalog.eirCode));
+        router.get("/pcw/:apiKey/address/uk/:fragment").handler((routingContext) ->
+                handleRequest(routingContext, AddressCatalog.premise));
 
         // finally, create the http server, using the created router
         vertx
@@ -85,12 +88,12 @@ public class ProxyService extends AbstractVerticle {
 
     /**
      * This method is HTTP-related, and is responsible for handling the
-     * requests received from the outer world, validating them and routing
+     * requests received from the outer world, validating and routing
      * them.
      *
      * @param routingContext routing context as provided by vertx-web
      */
-    private void handleIERequest(RoutingContext routingContext) {
+    protected void handleRequest(RoutingContext routingContext, AddressCatalog catalog) {
         String apiKey = routingContext.request().getParam("apiKey");
         String fragment = routingContext.request().getParam("fragment");
         String format = routingContext.request().getParam("format");
@@ -109,8 +112,9 @@ public class ProxyService extends AbstractVerticle {
         } else {
             routingContext
                     .response()
+                    // TODO make this behaviour richer: can't be a 200 always!!!
                     .setStatusCode(HttpResponseStatus.OK.code())
-                    .end(Json.encodePrettily(getAddressesString(apiKey, AddressCatalog.eirCode, fragment)));
+                    .end(Json.encodePrettily(getAddressesString(apiKey, catalog, fragment)));
         }
     }
 
@@ -123,7 +127,7 @@ public class ProxyService extends AbstractVerticle {
      * @param fragment string for which the search is performed  @return result of the search,
      *                 either fresh or cached
      */
-    private String getAddressesString(String apiKey, AddressCatalog catalog, String fragment) {
+    protected String getAddressesString(String apiKey, AddressCatalog catalog, String fragment) {
         return null;
     }
 
