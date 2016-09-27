@@ -3,7 +3,6 @@ package com.fexco.test;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -118,7 +117,19 @@ public class ProxyService extends AbstractVerticle {
                             .put("message", BAD_REQUEST.reasonPhrase())
                             .encodePrettily());
         } else {
-            sendResponseTo(routingContext.response(), apiKey, catalog, fragment);
+            obtainAddress(apiKey, catalog, fragment).setHandler(stringAsyncResult -> {
+                logger.info("Handling the future");
+                if (stringAsyncResult.succeeded()) {
+                    logger.info("Future completed with success");
+                    routingContext.response().setStatusCode(OK.code())
+                            .end(stringAsyncResult.result());
+                } else {
+                    logger.warn("Future failed");
+                    routingContext.response().setStatusCode(INTERNAL_SERVER_ERROR.code())
+                            .end(stringAsyncResult.result());
+                }
+
+            });
         }
     }
 
@@ -126,46 +137,43 @@ public class ProxyService extends AbstractVerticle {
      * Look for the required fragment in redis. If not found, query the proxy-ed service and store
      * the result in redis. In any case, send the response through the given response object.
      *
-     * @param response response object to use when sending the response
      * @param apiKey   authentication token from the client
      * @param catalog  catalog upon which the query is to be performed
-     * @param fragment string for which the search is performed  @return result of the search,
-     *                 either fresh or cached
+     * @param fragment string for which the search is performed
+     * @return future for the asynchronously obtained result
      */
-    private void sendResponseTo(HttpServerResponse response, String apiKey, AddressCatalog catalog, String fragment) {
+    private Future<String> obtainAddress(String apiKey, AddressCatalog catalog, String fragment) {
+        Future<String> future = Future.future();
+
         redis.get(catalog.getPrefix() + ":" + fragment, stringAsyncResult -> {
             if (stringAsyncResult.failed()) {
-                response
-                        .setStatusCode(INTERNAL_SERVER_ERROR.code())
-                        .end(new JsonObject()
-                                .put("code", INTERNAL_SERVER_ERROR.code())
-                                .put("message", INTERNAL_SERVER_ERROR.reasonPhrase())
-                                .encodePrettily());
+                future.fail(new JsonObject()
+                        .put("code", INTERNAL_SERVER_ERROR.code())
+                        .put("message", INTERNAL_SERVER_ERROR.reasonPhrase())
+                        .encodePrettily());
             } else {
                 String redisResult = stringAsyncResult.result();
                 if (redisResult != null) {
                     // found it in redis, just return it
                     logger.info("Fragment [" + fragment + "] has been found in redis, returning it");
-                    response
-                            .setStatusCode(OK.code())
-                            .end(redisResult);
+
+                    future.complete(redisResult);
+
                 } else {
                     logger.info("Fragment [" + fragment + "] has NOT been found in redis, querying it");
-                    externalHttpClient.getNow(80, "ws.postcoder.com", "/pcw/PCW45-12345-12345-1234X/address/ie/D02X285?format=json",
+                    externalHttpClient.getNow(80, "ws.postcoder.com", "/pcw/" + apiKey + "/address/ie/" + fragment + "?format=json",
                             httpClientResponse -> {
                                 logger.info("Reply from postcoder has been received");
                                 if (httpClientResponse.statusCode() != OK.code()) {
                                     logger.info("But reply from postcoder is not ok");
-                                    response.setStatusCode(INTERNAL_SERVER_ERROR.code())
-                                            .end(httpClientResponse.statusMessage());
+                                    future.fail(httpClientResponse.statusMessage());
                                 } else {
                                     logger.info("And reply from postcoder is ok");
                                     httpClientResponse.bodyHandler(buffer -> {
                                         redis.set(catalog.getPrefix() + ":" + fragment, buffer.toString(), voidAsyncResult -> {
                                             logger.info("Stored fragment [" + fragment + "] in redis, with value [" + buffer.toString() + "]");
                                         });
-                                        response.setStatusCode(OK.code())
-                                                .end(buffer);
+                                        future.complete(buffer.toString());
                                     });
                                 }
                             });
@@ -173,6 +181,7 @@ public class ProxyService extends AbstractVerticle {
             }
         });
 
+        return future;
     }
 
 }
