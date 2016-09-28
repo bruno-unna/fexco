@@ -146,7 +146,6 @@ TBD
     - A `docker` client available (tested with version 1.12.1).
     - `docker-compose` (tested with version 1.8.0).
 1. Clone [this repository](https://github.com/bruno-unna/fexco).
-1. Checkout branch `develop` (`master` is reserved for production).
 1. Within the base directory of the project, run `mvn package`.
 1. Run `docker-compose -p fexco up`.
 1. Connect using a browser to [the proxy server](http://localhost:8080/pcw/PCW45-12345-12345-1234X/address/ie/D02X285).
@@ -154,7 +153,7 @@ TBD
 
 #### Next steps and enhancements
 
-- Adding a TTL (time to live)to the cached information. This is trivial 
+- Adding a TTL (time to live) to the cached information. This is trivial 
   when using Redis but needs discussion and needs to be configured 
   in the solution.
 - Writing integration tests. Several libraries exist to help with 
@@ -166,4 +165,4 @@ TBD
   systems. Again, time constraints limited very much the amount 
   of tests that were automated in the solution.
 - Soak test the solution, hammering and stressing it to discover 
-  how well it can potentially scale.
+  how well it can potentially scale. JMeter can be used for this.
