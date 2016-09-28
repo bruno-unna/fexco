@@ -113,9 +113,30 @@ ellipsis next to several boxes:
 
 ### Technology stack
 
+The solution is flexible enough to be run in any environment as long as 
+it includes a Redis server (or cluster). In particular, a Docker 
+environment is going to be used, according to specifications. For that 
+reason, the Redis server image has been included in the provided 
+[docker-compose](https://docs.docker.com/compose/overview/) 
+specification.
+
+For storing the information a [Redis](http://redis.io/) server was 
+preferred over an ad-hoc in-memory handling/storage/retrieval, 
+because it provides the speed of in-memory storage, the convenience 
+of distributed information, the required persistence and the 
+high-availability clustering if needed. Besides, reactive drivers 
+exist for Redis in many reactive frameworks, including Vert.x.
+
+Since the solution was devised as a reactive application, a stack 
+was chosen, as simple as possible but fit to purpose. Based on that 
+reasoning, and given recent familiarisation with it, 
+[Vert.x](http://vertx.io/) was selected.
+
 ### Discussion
 
 #### Code structure
+
+TBD
 
 #### <a name="how_to_run"></a>How to run
 
@@ -124,7 +145,7 @@ ellipsis next to several boxes:
     - Maven builder (tested with version 3.3.9).
     - A `docker` client available (tested with version 1.12.1).
     - `docker-compose` (tested with version 1.8.0).
-1. Clone the repository [https://github.com/bruno-unna/fexco](https://github.com/bruno-unna/fexco).
+1. Clone [this repository](https://github.com/bruno-unna/fexco).
 1. Checkout branch `develop` (`master` is reserved for production).
 1. Within the base directory of the project, run `mvn package`.
 1. Run `docker-compose -p fexco up`.
