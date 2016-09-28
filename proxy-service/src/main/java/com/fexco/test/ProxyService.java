@@ -158,30 +158,36 @@ public class ProxyService extends AbstractVerticle {
                     logger.info("Fragment [" + fragment + "] has been found in redis, returning it");
 
                     future.complete(redisResult);
-
                 } else {
                     logger.info("Fragment [" + fragment + "] has NOT been found in redis, querying it");
-                    externalHttpClient.getNow(80, "ws.postcoder.com", "/pcw/" + apiKey + "/address/ie/" + fragment + "?format=json",
-                            httpClientResponse -> {
-                                logger.info("Reply from postcoder has been received");
-                                if (httpClientResponse.statusCode() != OK.code()) {
-                                    logger.info("But reply from postcoder is not ok");
-                                    future.fail(httpClientResponse.statusMessage());
-                                } else {
-                                    logger.info("And reply from postcoder is ok");
-                                    httpClientResponse.bodyHandler(buffer -> {
-                                        redis.set(catalog.getPrefix() + ":" + fragment, buffer.toString(), voidAsyncResult -> {
-                                            logger.info("Stored fragment [" + fragment + "] in redis, with value [" + buffer.toString() + "]");
-                                        });
-                                        future.complete(buffer.toString());
-                                    });
-                                }
-                            });
+                    queryExternalService(apiKey, catalog, fragment, future);
                 }
             }
         });
 
         return future;
+    }
+
+    private void queryExternalService(String apiKey, AddressCatalog catalog, String fragment, Future<String> future) {
+        externalHttpClient.getNow(80, "ws.postcoder.com",
+                String.format("/pcw/%s/address/%s/%s?format=json", apiKey, catalog.getPrefix(), fragment),
+                httpClientResponse -> {
+                    logger.info("Reply from postcoder has been received");
+                    if (httpClientResponse.statusCode() != OK.code()) {
+                        logger.info("But reply from postcoder is not ok");
+                        future.fail(httpClientResponse.statusMessage());
+                    } else {
+                        logger.info("And reply from postcoder is ok");
+                        httpClientResponse.bodyHandler(buffer -> {
+                            redis.set(catalog.getPrefix() + ":" + fragment,
+                                    buffer.toString(),
+                                    voidAsyncResult -> {
+                                        logger.info("Stored fragment [" + fragment + "] in redis, with value [" + buffer.toString() + "]");
+                                    });
+                            future.complete(buffer.toString());
+                        });
+                    }
+                });
     }
 
 }
