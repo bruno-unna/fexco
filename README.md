@@ -109,7 +109,7 @@ ellipsis next to several boxes:
 - The internal consumers can be numerous, by the definition of the problem.
 - Redis servers can be deployed in high-availability mode (clustered).
 - The proxy server, which is the main matter of this exercise, can be 
-  deployed after a load balancer if the load becomes really havy.
+  deployed after a load balancer if the load becomes really heavy.
 
 ### Technology stack
 
