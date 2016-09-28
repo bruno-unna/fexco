@@ -119,3 +119,18 @@ ellipsis next to several boxes:
 
 #### <a name="how_to_run"></a>How to run
 
+#### Next steps and enhancements
+
+- Adding a TTL (time to live)to the cached information. This is trivial 
+  when using Redis but needs discussion and needs to be configured 
+  in the solution.
+- Writing integration tests. Several libraries exist to help with 
+  this, AssertJ and Rest-Assured are known to play nicely with Vert.x. 
+  It is recognised that this should have been done beforehand, but 
+  time constraints forced the lowering of its priority.
+- Providing ex-ante thorough unit tests. It is generally preferred 
+  to write tests first (TDD), specially in complex or multi-component 
+  systems. Again, time constraints limited very much the amount 
+  of tests that were automated in the solution.
+- Soak test the solution, hammering and stressing it to discover 
+  how well it can potentially scale.
