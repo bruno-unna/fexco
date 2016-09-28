@@ -10,12 +10,20 @@
         <version>0.1.0</version>
     </parent>
 
-    <artifactId>mock-service</artifactId>
+    <artifactId>proxy-service</artifactId>
 
     <properties>
         <!-- Main verticle -->
-        <main.verticle>com.fexco.test.mockService.MockService</main.verticle>
+        <main.verticle>com.fexco.test.ProxyService</main.verticle>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-redis-client</artifactId>
+            <version>${stack.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -33,7 +41,7 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.4.13</version>
                 <configuration>
-                    <imageName>unna/mock-service</imageName>
+                    <imageName>unna/proxy-service</imageName>
                 </configuration>
             </plugin>
         </plugins>
