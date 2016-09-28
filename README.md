@@ -119,6 +119,18 @@ ellipsis next to several boxes:
 
 #### <a name="how_to_run"></a>How to run
 
+1. Make sure you have the following tools available:
+    - A Java 8 JDK.
+    - Maven builder (tested with version 3.3.9).
+    - A `docker` client available (tested with version 1.12.1).
+    - `docker-compose` (tested with version 1.8.0).
+1. Clone the repository [https://github.com/bruno-unna/fexco](https://github.com/bruno-unna/fexco).
+1. Checkout branch `develop` (`master` is reserved for production).
+1. Within the base directory of the project, run `mvn package`.
+1. Run `docker-compose -p fexco up`.
+1. Connect using a browser to [the proxy server](http://localhost:8080/pcw/PCW45-12345-12345-1234X/address/ie/D02X285).
+1. Play changing the values in the URL and observe the cache hits and misses in the console.
+
 #### Next steps and enhancements
 
 - Adding a TTL (time to live)to the cached information. This is trivial 
