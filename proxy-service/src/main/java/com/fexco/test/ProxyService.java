@@ -24,7 +24,7 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
  */
 public class ProxyService extends AbstractVerticle {
 
-    private Logger logger = LoggerFactory.getLogger(ProxyService.class);
+    private final Logger logger = LoggerFactory.getLogger(ProxyService.class);
     private RedisClient redis;
     private HttpClient externalHttpClient;
 
@@ -104,7 +104,7 @@ public class ProxyService extends AbstractVerticle {
         String apiKey = routingContext.request().getParam("apiKey");
         String fragment = routingContext.request().getParam("fragment");
         String format = routingContext.request().getParam("format");
-        logger.info("received a request, apiKey=" + apiKey + ", fragment=" + fragment);
+        logger.info("received a request, apiKey=" + apiKey + ", fragment=" + fragment + ", format=" + format);
 
         routingContext.response().putHeader(CONTENT_TYPE.toString(), APPLICATION_JSON);
 
@@ -181,9 +181,8 @@ public class ProxyService extends AbstractVerticle {
                         httpClientResponse.bodyHandler(buffer -> {
                             redis.set(catalog.getPrefix() + ":" + fragment,
                                     buffer.toString(),
-                                    voidAsyncResult -> {
-                                        logger.info("Stored fragment [" + fragment + "] in redis, with value [" + buffer.toString() + "]");
-                                    });
+                                    voidAsyncResult ->
+                                            logger.info("Stored fragment [" + fragment + "] in redis, with value [" + buffer.toString() + "]"));
                             future.complete(buffer.toString());
                         });
                     }

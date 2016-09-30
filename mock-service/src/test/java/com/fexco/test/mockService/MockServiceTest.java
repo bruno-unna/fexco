@@ -14,20 +14,17 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 /**
- * Test for the mock eircom/postcode service.
+ * Test for the mock Eircode/Postcode service.
  */
 @RunWith(VertxUnitRunner.class)
 public class MockServiceTest {
     private Vertx vertx;
     private int port;
-    private Logger logger = LoggerFactory.getLogger(MockServiceTest.class);
 
     @Before
     public void setUp(TestContext context) throws Exception {

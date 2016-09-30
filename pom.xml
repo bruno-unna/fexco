@@ -104,7 +104,7 @@
                                             <Main-Verticle>${main.verticle}</Main-Verticle>
                                         </manifestEntries>
                                     </transformer>
-                                </transformers>
+                                </transformers>Mock
                                 <artifactSet>
                                 </artifactSet>
                                 <outputFile>
@@ -131,7 +131,7 @@
                     <configuration>
                         <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
                         <!-- this needs to be overridden by modules -->
-                        <imageName></imageName>
+                        <imageName/>
                         <resources>
                             <resource>
                                 <targetPath>/verticles</targetPath>

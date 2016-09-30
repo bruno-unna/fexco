@@ -20,12 +20,12 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * a verticle generating mock responses for eircode queries
+ * a verticle generating mock responses for Eircode queries
  */
 public class MockService extends AbstractVerticle {
 
-    private Logger logger = LoggerFactory.getLogger(MockService.class);
-    private Random random = new Random(System.currentTimeMillis());
+    private final Logger logger = LoggerFactory.getLogger(MockService.class);
+    private final Random random = new Random(System.currentTimeMillis());
 
     @Override
     public void start(Future<Void> future) throws Exception {
@@ -52,7 +52,7 @@ public class MockService extends AbstractVerticle {
         String apiKey = routingContext.request().getParam("apiKey");
         String fragment = routingContext.request().getParam("fragment");
         String format = routingContext.request().getParam("format");
-        logger.info("in getAddress, apiKey=" + apiKey + ", fragment=" + fragment);
+        logger.info("in getAddress, apiKey=" + apiKey + ", fragment=" + fragment + ", format=" + format);
 
         routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON);
 
