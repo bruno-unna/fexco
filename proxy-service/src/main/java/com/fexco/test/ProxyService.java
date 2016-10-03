@@ -1,7 +1,9 @@
 package com.fexco.test;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -99,6 +101,7 @@ public class ProxyService extends AbstractVerticle {
      * them.
      *
      * @param routingContext routing context as provided by vertx-web
+     * @param catalog        catalog of addresses to be queried/updated
      */
     private void handleRequest(RoutingContext routingContext, AddressCatalog catalog) {
         String apiKey = routingContext.request().getParam("apiKey");
@@ -117,7 +120,7 @@ public class ProxyService extends AbstractVerticle {
                             .put("message", BAD_REQUEST.reasonPhrase())
                             .encodePrettily());
         } else {
-            obtainAddress(apiKey, catalog, fragment).setHandler(stringAsyncResult -> {
+            obtainAddress(apiKey, catalog, fragment, stringAsyncResult -> {
                 logger.info("Handling the future");
                 if (stringAsyncResult.succeeded()) {
                     logger.info("Future completed with success");
@@ -140,10 +143,11 @@ public class ProxyService extends AbstractVerticle {
      * @param apiKey   authentication token from the client
      * @param catalog  catalog upon which the query is to be performed
      * @param fragment string for which the search is performed
-     * @return future for the asynchronously obtained result
+     * @param handler  handler of the asynchronously obtained result
      */
-    private Future<String> obtainAddress(String apiKey, AddressCatalog catalog, String fragment) {
+    private void obtainAddress(String apiKey, AddressCatalog catalog, String fragment, Handler<AsyncResult<String>> handler) {
         Future<String> future = Future.future();
+        future.setHandler(handler);
 
         redis.get(catalog.getPrefix() + ":" + fragment, stringAsyncResult -> {
             if (stringAsyncResult.failed()) {
@@ -154,9 +158,7 @@ public class ProxyService extends AbstractVerticle {
             } else {
                 String redisResult = stringAsyncResult.result();
                 if (redisResult != null) {
-                    // found it in redis, just return it
                     logger.info("Fragment [" + fragment + "] has been found in redis, returning it");
-
                     future.complete(redisResult);
                 } else {
                     logger.info("Fragment [" + fragment + "] has NOT been found in redis, querying it");
@@ -164,10 +166,16 @@ public class ProxyService extends AbstractVerticle {
                 }
             }
         });
-
-        return future;
     }
 
+    /**
+     * Performs the actual query to the external 'postcoder' service.
+     *
+     * @param apiKey   authentication token
+     * @param catalog  catalog to be queried (Ireland/UK)
+     * @param fragment string for which to search
+     * @param future   future to complete with the obtained result
+     */
     private void queryExternalService(String apiKey, AddressCatalog catalog, String fragment, Future<String> future) {
         externalHttpClient.getNow(80, "ws.postcoder.com",
                 String.format("/pcw/%s/address/%s/%s?format=json", apiKey, catalog.getPrefix(), fragment),
